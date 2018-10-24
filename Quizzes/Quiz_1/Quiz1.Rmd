@@ -1,0 +1,140 @@
+---
+title: "Getting and Cleaning Data Quiz 1"
+author: "Francisco Martín"
+date: "September, 2018"
+output: html_document
+---
+
+
+## 1.-
+The American Community Survey distributes downloadable data about United States communities. Download the 2006 microdata survey about housing for the state of Idaho using download.file() from here: https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06hid.csv and load the data into R. The code book, describing the variable names is here: https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FPUMSDataDict06.pdf. How many properties are worth $1,000,000 or more?
+
+- 53   (Correct)
+
+- 164
+
+- 25
+
+- 2076
+
+Solution ->
+
+``` {r prove_1}
+url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06hid.csv"
+path <- file.path(getwd(),"dataQuestion1.csv")
+if(!file.exists(path)){
+        download.file(url,path)
+}
+
+data <- read.csv(path)
+# VAL equal 24 means value is more than 1M$
+length(which(data$VAL==24))
+```
+
+## 2.-
+
+Use the data you loaded from Question 1. Consider the variable FES in the code book. Which of the "tidy data" principles does this variable violate?
+
+- Each variable in a tidy data set has been transformed to be interpretable.
+
+- Each tidy data table contains information about only one type of observation.
+
+- Tidy data has one variable per column.  (Correct)
+
+- Tidy data has one observation per row.
+
+Solution -> FES has more than one variable in the column.
+
+
+## 3.- 
+
+Download the Excel spreadsheet on Natural Gas Aquisition Program here: https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FDATA.gov_NGAP.xlsx.
+
+Read rows 18-23 and columns 7-15 into R and assign the result to a variable called: `dat`. What is the value of:
+`sum(dat$Zip*dat$Ext,na.rm=T)`. (original data source: http://catalog.data.gov/dataset/natural-gas-acquisition-program)
+
+- 36534720  (Correct)
+
+- 0
+
+- 154339
+
+- NA
+
+Solution ->
+
+``` {r prove_3}
+suppressPackageStartupMessages(library(xlsx))
+url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2FDATA.gov_NGAP.xlsx"
+path <- file.path(getwd(),"dataQuestion3.xlsx")
+if(!file.exists(path)){
+        download.file(url,path)
+}
+colIndex <- 7:15 
+rowIndex <- 18:23
+dat <- read.xlsx(path,sheetIndex=1, colIndex = colIndex, rowIndex = rowIndex)
+sum(dat$Zip*dat$Ext,na.rm=T)
+```
+
+## 4.-
+
+Read the XML data on Baltimore restaurants from here:
+
+https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Frestaurants.xml
+
+How many restaurants have zipcode 21231?
+
+- 28
+
+- 100
+
+- 127  (Correct)
+
+- 130
+
+Solution ->
+
+``` {r prove_4}
+suppressPackageStartupMessages(library("XML"))
+url <- "http://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Frestaurants.xml"
+doc <- xmlInternalTreeParse(url)
+rootNode <- xmlRoot(doc)
+zipcode <- xpathSApply(rootNode, "//zipcode", xmlValue)
+table(zipcode == 21231)
+```
+
+## 5.-
+
+The American Community Survey distributes downloadable data about United States communities. Download the 2006 microdata survey about housing for the state of Idaho using download.file() from here:
+
+https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06pid.csv
+
+using the fread() command load the data into an R object `DT`. The following are ways to calculate the average value of the variable `pwgtp15` broken down by sex. Using the data.table package, which will deliver the fastest user time?
+
+
+- mean(DT$pwgtp15,by=DT$SEX)
+
+- mean(DT[DT$SEX==1,]$pwgtp15); mean(DT[DT$SEX==2,]$pwgtp15)
+
+- sapply(split(DT$pwgtp15,DT$SEX),mean)
+
+- tapply(DT$pwgtp15,DT$SEX,mean)
+
+- DT[,mean(pwgtp15),by=SEX]  (Correct)
+
+- rowMeans(DT)[DT$SEX==1]; rowMeans(DT)[DT$SEX==2]
+
+Solution ->
+
+``` {r prove_5}
+suppressPackageStartupMessages(library(data.table))
+url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fdata%2Fss06pid.csv"
+path <- file.path(getwd(),"dataQuestion5.csv")
+if(!file.exists(path)){
+        download.file(url,path)
+}
+
+DT <- fread(path)
+
+system.time(DT[,mean(pwgtp15),by=SEX])
+```
